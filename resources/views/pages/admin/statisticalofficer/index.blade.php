@@ -1,0 +1,108 @@
+@extends('layouts.main')
+@section('content')
+    <div class="card">
+        <div class="card-header text-info text-center">
+            Statistical officer's
+            @can('user-create')
+                <a class="btn  float-left btn-xs"  href="{{ route('users.create') }}"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new user</a>
+            @endcan
+        </div>
+        @if ($message = Session::get('warning'))
+            <div class="alert alert-warning alert-dismissible fade show">
+                <p>{{ $message }}</p>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+        @if ($message = Session::get('failed'))
+            <div class="alert alert-warning alert-dismissible fade show">
+                <p>{{ $message }}</p>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+        <div class="card-body">
+            @if ($message = Session::get('success'))
+                <div class="alert alert-success alert-dismissible fade show">
+                    <p>{{ $message }}</p>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
+            <div class="table-responsive">
+                List of all statistical office's
+                <table class="table table-bordered table-striped  table-sm">
+                    <thead>
+                    <tr>
+                        <th>S/no</th>
+                        <th>Email</th>
+                        <th>Region</th>
+                        <th>Council</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        @can('user-ban')
+                        <th>Block user</th>
+                        @endcan
+                        @can('statisticalofficer-view')
+                        <th>Action</th>
+                        @endcan
+                    </tr>
+                    </thead>
+                    @foreach ($statisticalofficer as $key => $user)
+                        <tr>
+                            <td>{{ ++$i }}</td>
+                            <td>{{ $user->email }}</td>
+                            @if($user->region_id==null)
+                               <td class="text-info"></td>
+                            @else
+                                <td class="text-uppercase">{{ $user->region->name }}</td>
+                            @endif
+                            @if($user->council_id==null)
+                               <td class="text-info"></td>
+                            @else
+                                <td>{{ $user->council->name }}</td>
+                            @endif
+                            <td>
+                                @if(!empty($user->getRoleNames()))
+                                    @foreach($user->getRoleNames() as $v)
+                                        {{ $v }}
+                                    @endforeach
+                                @endif
+                            </td>
+                            <td>
+                                    @if($user->status==0)
+                                        <span class="text-success">
+                                        Active
+                                    </span>
+                                    @else
+                                        <span class="text-danger">
+                                        Blocked
+                                    </span>
+                                    @endif
+                            </td>
+                            @can('user-ban')
+                            <td>
+                                <input data-id="{{$user->id}}" class="js-switch" type="checkbox"
+                                    {{ $user->status == 1 ? 'checked' : '' }}>
+                            </td>
+                            @endcan
+                            @can('statisticalofficer-view')
+                            <td>
+                                <form action="{{ route('users.destroy',$user->id) }}" method="POST">
+                                    @csrf
+                                        <a class="btn btn-primary btn-xs" href="{{ route('users.show',$user->id) }}"><i class="fas fa-eye"></i> view</a>
+                                         <a class="btn btn-info btn-xs" href="{{ route('users.edit',$user->id) }}"><i class="fas fa-pencil-alt"></i> update</a>
+                                </form>
+                            </td>
+                            @endcan
+                        </tr>
+                    @endforeach
+                </table>
+            </div>
+             {{ $statisticalofficer->links() }}
+        </div>
+    </div>
+@endsection
